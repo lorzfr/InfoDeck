@@ -92,19 +92,25 @@ bun install || { fail "bun install failed — trying npm"; npm install; }
 ok "Dependencies installed"
 
 # --- 5. Config ---
-log "Initial configuration (can be changed later from the web UI)"
-echo "" >&7
-
-TITLE=$(prompt_str "Dashboard title:" "InfoDeck Dashboard")
-OLLAMA_URL=$(prompt_str "Ollama API URL (leave as-is if no Ollama yet):" "http://localhost:11434")
-OLLAMA_MODEL=$(prompt_str "Ollama model:" "llama3")
-WEATHER=$(prompt_str "Weather location (City,Country or lat,lon):" "Berlin,DE")
-WEATHER_KEY=$(prompt_str "OpenWeatherMap API key (leave blank for free Open-Meteo):" "")
-FR_LAT=$(prompt_str "FlightRadar24 center latitude:" "52.52")
-FR_LON=$(prompt_str "FlightRadar24 center longitude:" "13.405")
-
 CONFIG_FILE="$INSTALL_DIR/server/config.json"
-cat > "$CONFIG_FILE" <<JSONEOF
+if [ -f "$CONFIG_FILE" ]; then
+  # backup existing config
+  cp "$CONFIG_FILE" "$CONFIG_FILE.install-$(date +%s).bak"
+  ok "Existing config backed up (not overwritten)"
+  info "Using your existing config at $CONFIG_FILE"
+else
+  log "Initial configuration (can be changed later from the web UI)"
+  echo "" >&7
+
+  TITLE=$(prompt_str "Dashboard title:" "InfoDeck Dashboard")
+  OLLAMA_URL=$(prompt_str "Ollama API URL (leave as-is if no Ollama yet):" "http://localhost:11434")
+  OLLAMA_MODEL=$(prompt_str "Ollama model:" "llama3")
+  WEATHER=$(prompt_str "Weather location (City,Country or lat,lon):" "Berlin,DE")
+  WEATHER_KEY=$(prompt_str "OpenWeatherMap API key (leave blank for free Open-Meteo):" "")
+  FR_LAT=$(prompt_str "FlightRadar24 center latitude:" "52.52")
+  FR_LON=$(prompt_str "FlightRadar24 center longitude:" "13.405")
+
+  cat > "$CONFIG_FILE" <<JSONEOF
 {
   "general": {
     "dashboardTitle": "${TITLE}",
@@ -150,7 +156,8 @@ cat > "$CONFIG_FILE" <<JSONEOF
   }
 }
 JSONEOF
-ok "Configuration saved"
+  ok "Configuration saved"
+fi
 
 # --- 6. Systemd ---
 log "Systemd service"

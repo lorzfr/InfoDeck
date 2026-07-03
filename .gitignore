@@ -5,3 +5,4 @@ server/backups/
 public/icons/*
 !public/icons/.gitkeep
 *.log
+server/config.json

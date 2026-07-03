@@ -94,7 +94,10 @@ function ensureBackupDir() {
 }
 
 export function loadConfig(): Config {
+  ensureBackupDir();
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   try {
+    try { copyFileSync(CONFIG_PATH, join(BACKUP_DIR, `config.json.${timestamp}.bak`)); } catch { }
     const raw = readFileSync(CONFIG_PATH, 'utf-8');
     const parsed = JSON.parse(raw);
     config = { ...defaultConfig, ...parsed };
