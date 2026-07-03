@@ -128,9 +128,9 @@ cat > "$CONFIG_FILE" <<JSONEOF
       "enabled": true,
       "entries": [
         {
-          "name": "My Website",
+          "name": "My Service",
           "publicUrl": "https://example.com",
-          "lanUrl": "http://192.168.1.100",
+          "lanUrl": "",
           "icon": ""
         }
       ]

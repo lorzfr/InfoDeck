@@ -14,6 +14,19 @@ async function updateServices() {
     const cards = data.map(s => {
       const statusIcon = s.status === 'online' ? '✅' : s.status === 'degraded' ? '⚠️' : '❌';
       const statusClass = `service-${s.status}`;
+
+      const publicCell = !s.publicUrl
+        ? '<span class="text-gray-600">— not set</span>'
+        : s.publicReachable
+          ? `<span class="text-green-400">${s.publicHttpCode}</span> <span class="text-gray-500">${s.publicLatency}</span>`
+          : '<span class="text-red-400">Down</span>';
+
+      const lanCell = !s.lanUrl
+        ? '<span class="text-gray-600">— not set</span>'
+        : s.lanReachable
+          ? `<span class="text-green-400">${s.lanHttpCode}</span> <span class="text-gray-500">${s.lanLatency}</span>`
+          : '<span class="text-red-400">Down</span>';
+
       return `
         <div class="bg-gray-800/50 rounded-lg p-3 mb-2">
           <div class="flex items-center justify-between">
@@ -26,11 +39,11 @@ async function updateServices() {
           <div class="mt-2 text-xs text-gray-400 grid grid-cols-2 gap-2">
             <div>
               <span class="text-gray-500">Public:</span>
-              ${s.publicReachable ? `<span class="text-green-400">${s.publicHttpCode}</span> <span class="text-gray-500">${s.publicLatency}</span>` : '<span class="text-red-400">Down</span>'}
+              ${publicCell}
             </div>
             <div>
               <span class="text-gray-500">LAN:</span>
-              ${s.lanReachable ? `<span class="text-green-400">${s.lanHttpCode}</span> <span class="text-gray-500">${s.lanLatency}</span>` : '<span class="text-red-400">Down</span>'}
+              ${lanCell}
             </div>
           </div>
         </div>

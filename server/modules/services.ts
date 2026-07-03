@@ -40,15 +40,20 @@ export async function refreshServices(): Promise<ServiceStatus[]> {
 
   const results = await Promise.all(
     entries.map(async (entry) => {
+      const hasPublic = !!entry.publicUrl;
+      const hasLan = !!entry.lanUrl;
+
       const [publicResult, lanResult] = await Promise.all([
-        checkUrl(entry.publicUrl),
-        checkUrl(entry.lanUrl),
+        hasPublic ? checkUrl(entry.publicUrl) : Promise.resolve({ httpCode: '', latency: '', reachable: false }),
+        hasLan ? checkUrl(entry.lanUrl) : Promise.resolve({ httpCode: '', latency: '', reachable: false }),
       ]);
 
-      const onlineCount = [publicResult.reachable, lanResult.reachable].filter(Boolean).length;
+      const reachable = [publicResult.reachable, lanResult.reachable].filter(Boolean).length;
+      const configured = [hasPublic, hasLan].filter(Boolean).length;
       let status: 'online' | 'degraded' | 'offline';
-      if (onlineCount === 2) status = 'online';
-      else if (onlineCount === 1) status = 'degraded';
+      if (configured === 0) status = 'offline';
+      else if (reachable === configured) status = 'online';
+      else if (reachable > 0) status = 'degraded';
       else status = 'offline';
 
       return {
@@ -58,10 +63,10 @@ export async function refreshServices(): Promise<ServiceStatus[]> {
         icon: entry.icon,
         publicHttpCode: publicResult.httpCode,
         publicLatency: publicResult.latency,
-        publicReachable: publicResult.reachable,
+        publicReachable: hasPublic ? publicResult.reachable : false,
         lanHttpCode: lanResult.httpCode,
         lanLatency: lanResult.latency,
-        lanReachable: lanResult.reachable,
+        lanReachable: hasLan ? lanResult.reachable : false,
         status,
         lastChecked: Date.now(),
       };
