@@ -24,7 +24,9 @@
           "name": "My Service",
           "publicUrl": "https://example.com",
           "lanUrl": "",
-          "icon": ""
+          "icon": "",
+          "usePublic": true,
+          "useLan": false
         }
       ]
     },

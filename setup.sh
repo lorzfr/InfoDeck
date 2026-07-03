@@ -131,6 +131,8 @@ cat > "$CONFIG_FILE" <<JSONEOF
           "name": "My Service",
           "publicUrl": "https://example.com",
           "lanUrl": "",
+          "usePublic": true,
+          "useLan": false,
           "icon": ""
         }
       ]

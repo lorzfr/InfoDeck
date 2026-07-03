@@ -229,6 +229,8 @@ function dashboardApp() {
         publicUrl: '',
         lanUrl: '',
         icon: '',
+        usePublic: true,
+        useLan: false,
       });
     },
 

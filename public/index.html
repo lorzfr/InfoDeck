@@ -269,11 +269,25 @@
               <label class="settings-label">Name</label>
               <input type="text" x-model="entry.name" class="settings-input" placeholder="My Service">
 
-              <label class="settings-label">Public URL <span class="text-gray-500 font-normal">(optional)</span></label>
-              <input type="text" x-model="entry.publicUrl" class="settings-input" placeholder="https://example.com — leave empty to skip">
+              <div class="flex items-center gap-3 mb-1">
+                <label class="settings-label mb-0 flex-1">Public URL</label>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" x-model="entry.usePublic" class="sr-only peer">
+                  <div class="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                </label>
+                <span class="text-sm w-12 text-right" x-text="entry.usePublic ? 'ON' : 'OFF'"></span>
+              </div>
+              <input type="text" x-model="entry.publicUrl" class="settings-input" :class="!entry.usePublic ? 'opacity-40' : ''" :disabled="!entry.usePublic" placeholder="https://example.com">
 
-              <label class="settings-label">LAN URL <span class="text-gray-500 font-normal">(optional)</span></label>
-              <input type="text" x-model="entry.lanUrl" class="settings-input" placeholder="http://192.168.1.100 — leave empty to skip">
+              <div class="flex items-center gap-3 mb-1 mt-3">
+                <label class="settings-label mb-0 flex-1">LAN URL</label>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" x-model="entry.useLan" class="sr-only peer">
+                  <div class="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                </label>
+                <span class="text-sm w-12 text-right" x-text="entry.useLan ? 'ON' : 'OFF'"></span>
+              </div>
+              <input type="text" x-model="entry.lanUrl" class="settings-input" :class="!entry.useLan ? 'opacity-40' : ''" :disabled="!entry.useLan" placeholder="http://192.168.1.100">
 
               <label class="settings-label">Icon (optional)</label>
               <div class="flex gap-2 items-center">

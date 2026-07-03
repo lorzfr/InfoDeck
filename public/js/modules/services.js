@@ -15,14 +15,14 @@ async function updateServices() {
       const statusIcon = s.status === 'online' ? '✅' : s.status === 'degraded' ? '⚠️' : '❌';
       const statusClass = `service-${s.status}`;
 
-      const publicCell = !s.publicUrl
-        ? '<span class="text-gray-600">— not set</span>'
+      const publicCell = s.publicSkipped
+        ? '<span class="text-gray-600">— disabled</span>'
         : s.publicReachable
           ? `<span class="text-green-400">${s.publicHttpCode}</span> <span class="text-gray-500">${s.publicLatency}</span>`
           : '<span class="text-red-400">Down</span>';
 
-      const lanCell = !s.lanUrl
-        ? '<span class="text-gray-600">— not set</span>'
+      const lanCell = s.lanSkipped
+        ? '<span class="text-gray-600">— disabled</span>'
         : s.lanReachable
           ? `<span class="text-green-400">${s.lanHttpCode}</span> <span class="text-gray-500">${s.lanLatency}</span>`
           : '<span class="text-red-400">Down</span>';

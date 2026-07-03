@@ -9,6 +9,8 @@ export interface ServiceEntry {
   publicUrl: string;
   lanUrl: string;
   icon: string;
+  usePublic: boolean;
+  useLan: boolean;
 }
 
 export interface Config {
