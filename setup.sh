@@ -12,22 +12,25 @@ CLONE_DIR="/tmp/infodeck-clone"
 LOG_DIR="/var/log/infodeck"
 LOG_FILE="$LOG_DIR/install.log"
 
+# Save tty fds BEFORE exec redirect (breaks /dev/tty on some systems)
+exec 7>/dev/tty 6</dev/tty
+
 # --- helpers ---
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
 prompt_yn() {
   local msg="$1" default="${2:-Y}" ans
   while true; do
-    echo -en "${YELLOW}${msg} [${default}] ${NC}" > /dev/tty
-    read -r ans </dev/tty
+    echo -en "${YELLOW}${msg} [${default}] ${NC}" >&7
+    read -r ans <&6
     ans="${ans:-$default}"
-    case "$ans" in [Yy]*) return 0;; [Nn]*) return 1;; *) echo "Please answer y or n." > /dev/tty;; esac
+    case "$ans" in [Yy]*) return 0;; [Nn]*) return 1;; *) echo "Please answer y or n." >&7;; esac
   done
 }
 prompt_str() {
   local msg="$1" default="$2" ans
-  echo -e "${YELLOW}${msg}${NC}" > /dev/tty
-  echo -n "  [${default}]: " > /dev/tty
-  read -r ans </dev/tty
+  echo -e "${YELLOW}${msg}${NC}" >&7
+  echo -n "  [${default}]: " >&7
+  read -r ans <&6
   echo "${ans:-$default}"
 }
 
@@ -90,13 +93,13 @@ ok "Dependencies installed"
 
 # --- 5. Config ---
 log "Initial configuration (can be changed later from the web UI)"
-echo "" > /dev/tty
+echo "" >&7
 
-DASHBOARD_TITLE=$(prompt_str "Dashboard title:" "InfoDeck Dashboard")
+TITLE=$(prompt_str "Dashboard title:" "InfoDeck Dashboard")
 OLLAMA_URL=$(prompt_str "Ollama API URL (leave as-is if no Ollama yet):" "http://localhost:11434")
 OLLAMA_MODEL=$(prompt_str "Ollama model:" "llama3")
-WEATHER_LOCATION=$(prompt_str "Weather location (City,Country or lat,lon):" "Berlin,DE")
-WEATHER_API_KEY=$(prompt_str "OpenWeatherMap API key (leave blank for free Open-Meteo):" "")
+WEATHER=$(prompt_str "Weather location (City,Country or lat,lon):" "Berlin,DE")
+WEATHER_KEY=$(prompt_str "OpenWeatherMap API key (leave blank for free Open-Meteo):" "")
 FR_LAT=$(prompt_str "FlightRadar24 center latitude:" "52.52")
 FR_LON=$(prompt_str "FlightRadar24 center longitude:" "13.405")
 
@@ -104,7 +107,7 @@ CONFIG_FILE="$INSTALL_DIR/server/config.json"
 cat > "$CONFIG_FILE" <<JSONEOF
 {
   "general": {
-    "dashboardTitle": "${DASHBOARD_TITLE}",
+    "dashboardTitle": "${TITLE}",
     "viewMode": "boxes",
     "playlistSpeed": 10,
     "clockFormat": "24h",
@@ -117,9 +120,9 @@ cat > "$CONFIG_FILE" <<JSONEOF
   "modules": {
     "weather": {
       "enabled": true,
-      "location": "${WEATHER_LOCATION}",
+      "location": "${WEATHER}",
       "units": "metric",
-      "apiKey": "${WEATHER_API_KEY}"
+      "apiKey": "${WEATHER_KEY}"
     },
     "services": {
       "enabled": true,
