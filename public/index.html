@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1536, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title x-text="config.general.dashboardTitle || 'Dashboard'">Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-gray-900 text-white min-h-screen overflow-x-hidden font-sans" x-data="dashboardApp()" x-init="init()" :class="{ 'overflow-hidden': showSettings }">
+  <div class="relative min-h-screen">
+    <!-- Clock -->
+    <div class="fixed top-0 left-0 right-0 z-40 bg-gray-900/90 backdrop-blur-sm border-b border-gray-700/50 py-2 px-4">
+      <div class="text-center">
+        <div class="text-5xl font-mono font-bold tracking-wider tabular-nums" x-text="clockTime"></div>
+        <div class="text-lg font-mono text-gray-400 mt-1" x-text="clockDate"></div>
+      </div>
+      <button class="settings-cog" @click="openSettings()" title="Settings">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+      </button>
+
+      <!-- View mode toggle -->
+      <div class="absolute bottom-2 left-4">
+        <button @click="toggleViewMode()" class="touch-btn text-sm bg-gray-800 hover:bg-gray-700 rounded-lg px-4 py-2 flex items-center gap-2">
+          <template x-if="config.general.viewMode === 'boxes'">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+            </svg>
+          </template>
+          <template x-if="config.general.viewMode === 'playlist'">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+            </svg>
+          </template>
+          <span x-text="config.general.viewMode === 'boxes' ? 'Boxes' : 'Playlist'"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="pt-24 px-4 pb-8">
+      <!-- Box Grid View -->
+      <div x-show="config.general.viewMode === 'boxes'" class="dashboard-grid" id="dashboardGrid">
+        <!-- Weather -->
+        <div x-show="config.modules.weather.enabled" class="dashboard-card" id="weather-card">
+          <div class="card-title">Weather</div>
+          <div class="card-content" id="weather-content">
+            <div class="flex items-center justify-center h-full text-gray-400">
+              <svg class="animate-spin h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Services -->
+        <div x-show="config.modules.services.enabled" class="dashboard-card" id="services-card">
+          <div class="card-title">Service Health</div>
+          <div class="card-content" id="services-content">
+            <div class="flex items-center justify-center h-full text-gray-400">
+              <svg class="animate-spin h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Flightradar -->
+        <div x-show="config.modules.flightradar.enabled" class="dashboard-card" id="flightradar-card">
+          <div class="card-title">FlightRadar24</div>
+          <div class="card-content p-0" id="flightradar-content">
+            <div class="flex items-center justify-center h-full text-gray-400">
+              <svg class="animate-spin h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- LLM Summary -->
+        <div x-show="config.modules.llmSummary.enabled" class="dashboard-card" id="llm-summary-card">
+          <div class="card-title">System Summary</div>
+          <div class="card-content" id="llm-summary-content">
+            <div class="flex items-center justify-center h-full text-gray-400">
+              <svg class="animate-spin h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Playlist View -->
+      <div x-show="config.general.viewMode === 'playlist'" class="playlist-container" id="playlistContainer">
+        <div class="playlist-viewport" id="playlistViewport">
+          <!-- Weather -->
+          <div x-show="config.modules.weather.enabled" class="playlist-slide" id="playlist-weather">
+            <div class="text-2xl font-bold mb-4 text-gray-400">Weather</div>
+            <div id="playlist-weather-content" class="flex-1 flex items-center justify-center text-gray-500">
+              Loading...
+            </div>
+          </div>
+
+          <!-- Services -->
+          <div x-show="config.modules.services.enabled" class="playlist-slide" id="playlist-services">
+            <div class="text-2xl font-bold mb-4 text-gray-400">Service Health</div>
+            <div id="playlist-services-content" class="flex-1 flex items-center justify-center text-gray-500">
+              Loading...
+            </div>
+          </div>
+
+          <!-- Flightradar -->
+          <div x-show="config.modules.flightradar.enabled" class="playlist-slide" id="playlist-flightradar">
+            <div class="text-2xl font-bold mb-4 text-gray-400">FlightRadar24</div>
+            <div id="playlist-flightradar-content" class="flex-1 flex items-center justify-center text-gray-500 p-0">
+              Loading...
+            </div>
+          </div>
+
+          <!-- LLM Summary -->
+          <div x-show="config.modules.llmSummary.enabled" class="playlist-slide" id="playlist-llm-summary">
+            <div class="text-2xl font-bold mb-4 text-gray-400">System Summary</div>
+            <div id="playlist-llm-summary-content" class="flex-1 flex items-center justify-center text-gray-500">
+              Loading...
+            </div>
+          </div>
+        </div>
+
+        <!-- Playlist controls -->
+        <div class="playlist-controls">
+          <button @click="playlistPrev()" class="touch-btn playlist-nav-btn" title="Previous">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+          <button @click="togglePlaylistPause()" class="touch-btn playlist-nav-btn" title="Play/Pause">
+            <svg x-show="!playlistPaused" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <svg x-show="playlistPaused" xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </button>
+          <button @click="playlistNext()" class="touch-btn playlist-nav-btn" title="Next">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+        <div class="playlist-indicator" x-text="`${playlistIndex + 1} / ${playlistTotal}`"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Overlay -->
+  <div x-show="showSettings" class="settings-overlay" x-cloak>
+    <div class="settings-panel" @click.away="closeSettings()">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-3xl font-bold">Settings</h2>
+        <button @click="closeSettings()" class="touch-btn p-2 hover:bg-gray-700 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Settings tabs -->
+      <div class="settings-tabs">
+        <button @click="settingsTab = 'general'" :class="settingsTab === 'general' ? 'active' : ''" class="touch-btn">General</button>
+        <button @click="settingsTab = 'ollama'" :class="settingsTab === 'ollama' ? 'active' : ''" class="touch-btn">Ollama</button>
+        <button @click="settingsTab = 'weather'" :class="settingsTab === 'weather' ? 'active' : ''" class="touch-btn">Weather</button>
+        <button @click="settingsTab = 'services'" :class="settingsTab === 'services' ? 'active' : ''" class="touch-btn">Services</button>
+        <button @click="settingsTab = 'flightradar'" :class="settingsTab === 'flightradar' ? 'active' : ''" class="touch-btn">FlightRadar</button>
+        <button @click="settingsTab = 'llm'" :class="settingsTab === 'llm' ? 'active' : ''" class="touch-btn">LLM Summary</button>
+      </div>
+
+      <div class="settings-content">
+        <!-- General -->
+        <div x-show="settingsTab === 'general'" class="settings-form">
+          <label class="settings-label">Dashboard Title</label>
+          <input type="text" x-model="form.general.dashboardTitle" class="settings-input">
+
+          <label class="settings-label">View Mode</label>
+          <select x-model="form.general.viewMode" class="settings-input">
+            <option value="boxes">Box Grid</option>
+            <option value="playlist">Full-Size Playlist</option>
+          </select>
+
+          <label class="settings-label">Playlist Speed (seconds)</label>
+          <input type="number" x-model="form.general.playlistSpeed" class="settings-input" min="3" max="300">
+
+          <label class="settings-label">Clock Format</label>
+          <select x-model="form.general.clockFormat" class="settings-input">
+            <option value="24h">24-Hour</option>
+            <option value="12h">12-Hour</option>
+          </select>
+
+          <label class="settings-label">Date Format</label>
+          <select x-model="form.general.dateFormat" class="settings-input">
+            <option value="DD:MM:YYYY">DD:MM:YYYY</option>
+            <option value="MM:DD:YYYY">MM:DD:YYYY</option>
+            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+          </select>
+        </div>
+
+        <!-- Ollama -->
+        <div x-show="settingsTab === 'ollama'" class="settings-form">
+          <label class="settings-label">API URL</label>
+          <input type="text" x-model="form.ollama.apiUrl" class="settings-input" placeholder="http://localhost:11434">
+
+          <label class="settings-label">Model</label>
+          <input type="text" x-model="form.ollama.model" class="settings-input" placeholder="llama3">
+
+          <button @click="testOllamaConnection()" class="touch-btn mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-lg">
+            Test Connection
+          </button>
+          <p x-show="ollamaTestResult" x-text="ollamaTestResult" class="mt-2 text-sm" :class="ollamaTestOk ? 'text-green-400' : 'text-red-400'"></p>
+        </div>
+
+        <!-- Weather -->
+        <div x-show="settingsTab === 'weather'" class="settings-form">
+          <label class="flex items-center gap-3 text-xl mb-4">
+            <input type="checkbox" x-model="form.modules.weather.enabled" class="w-6 h-6">
+            <span>Enabled</span>
+          </label>
+
+          <label class="settings-label">Location (city,country or lat,lon)</label>
+          <input type="text" x-model="form.modules.weather.location" class="settings-input" placeholder="Berlin,DE">
+
+          <label class="settings-label">Units</label>
+          <select x-model="form.modules.weather.units" class="settings-input">
+            <option value="metric">Metric (°C)</option>
+            <option value="imperial">Imperial (°F)</option>
+          </select>
+
+          <label class="settings-label">API Key (OpenWeatherMap, optional)</label>
+          <input type="password" x-model="form.modules.weather.apiKey" class="settings-input" placeholder="Leave empty for Open-Meteo">
+        </div>
+
+        <!-- Services -->
+        <div x-show="settingsTab === 'services'" class="settings-form">
+          <label class="flex items-center gap-3 text-xl mb-4">
+            <input type="checkbox" x-model="form.modules.services.enabled" class="w-6 h-6">
+            <span>Enabled</span>
+          </label>
+
+          <template x-for="(entry, i) in form.modules.services.entries" :key="i">
+            <div class="border border-gray-600 rounded-lg p-4 mb-4">
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-lg font-semibold" x-text="`Service #${i + 1}`"></span>
+                <button @click="removeServiceEntry(i)" class="text-red-400 hover:text-red-300 touch-btn p-2">Remove</button>
+              </div>
+              <label class="settings-label">Name</label>
+              <input type="text" x-model="entry.name" class="settings-input" placeholder="My Service">
+
+              <label class="settings-label">Public URL</label>
+              <input type="text" x-model="entry.publicUrl" class="settings-input" placeholder="https://example.com">
+
+              <label class="settings-label">LAN URL</label>
+              <input type="text" x-model="entry.lanUrl" class="settings-input" placeholder="http://192.168.1.100">
+
+              <label class="settings-label">Icon (optional)</label>
+              <div class="flex gap-2 items-center">
+                <input type="text" x-model="entry.icon" class="settings-input flex-1" placeholder="Icon URL or base64">
+                <button @click="uploadServiceIcon(i)" class="touch-btn bg-gray-700 hover:bg-gray-600 px-4 py-3 rounded-lg text-sm">Upload</button>
+              </div>
+            </div>
+          </template>
+
+          <button @click="addServiceEntry()" class="touch-btn bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg text-lg">
+            + Add Service
+          </button>
+        </div>
+
+        <!-- Flightradar -->
+        <div x-show="settingsTab === 'flightradar'" class="settings-form">
+          <label class="flex items-center gap-3 text-xl mb-4">
+            <input type="checkbox" x-model="form.modules.flightradar.enabled" class="w-6 h-6">
+            <span>Enabled</span>
+          </label>
+
+          <label class="settings-label">Center Latitude</label>
+          <input type="number" x-model="form.modules.flightradar.centerLat" class="settings-input" step="0.01">
+
+          <label class="settings-label">Center Longitude</label>
+          <input type="number" x-model="form.modules.flightradar.centerLon" class="settings-input" step="0.01">
+
+          <label class="settings-label">Zoom Level</label>
+          <input type="number" x-model="form.modules.flightradar.zoom" class="settings-input" min="1" max="12">
+        </div>
+
+        <!-- LLM Summary -->
+        <div x-show="settingsTab === 'llm'" class="settings-form">
+          <label class="flex items-center gap-3 text-xl mb-4">
+            <input type="checkbox" x-model="form.modules.llmSummary.enabled" class="w-6 h-6">
+            <span>Enabled</span>
+          </label>
+
+          <label class="settings-label">Regeneration Interval (minutes)</label>
+          <input type="number" x-model="form.modules.llmSummary.intervalMinutes" class="settings-input" min="5" max="1440">
+        </div>
+      </div>
+
+      <!-- Save button -->
+      <div class="mt-6 flex gap-4">
+        <button @click="saveSettings()" class="touch-btn flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl text-xl">
+          Save Settings
+        </button>
+        <button @click="closeSettings()" class="touch-btn bg-gray-700 hover:bg-gray-600 text-white font-bold py-4 px-8 rounded-xl text-xl">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden file input for icon upload -->
+  <input type="file" id="iconUploadInput" class="hidden" accept="image/*">
+
+  <script src="/js/modules/weather.js"></script>
+  <script src="/js/modules/services.js"></script>
+  <script src="/js/modules/flightradar.js"></script>
+  <script src="/js/modules/llm-summary.js"></script>
+  <script src="/js/settings.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

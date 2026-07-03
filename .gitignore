@@ -1,0 +1,7 @@
+node_modules/
+logs/*
+!logs/.gitkeep
+server/backups/
+public/icons/*
+!public/icons/.gitkeep
+*.log

@@ -1,0 +1,42 @@
+{
+  "general": {
+    "dashboardTitle": "InfoDeck Dashboard",
+    "viewMode": "boxes",
+    "playlistSpeed": 10,
+    "clockFormat": "24h",
+    "dateFormat": "DD:MM:YYYY"
+  },
+  "ollama": {
+    "apiUrl": "http://localhost:11434",
+    "model": "llama3"
+  },
+  "modules": {
+    "weather": {
+      "enabled": true,
+      "location": "Berlin,DE",
+      "units": "metric",
+      "apiKey": ""
+    },
+    "services": {
+      "enabled": true,
+      "entries": [
+        {
+          "name": "My Website",
+          "publicUrl": "https://example.com",
+          "lanUrl": "http://192.168.1.100",
+          "icon": ""
+        }
+      ]
+    },
+    "flightradar": {
+      "enabled": true,
+      "centerLat": 52.52,
+      "centerLon": 13.405,
+      "zoom": 7
+    },
+    "llmSummary": {
+      "enabled": true,
+      "intervalMinutes": 60
+    }
+  }
+}

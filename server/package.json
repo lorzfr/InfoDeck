@@ -1,0 +1,20 @@
+{
+  "name": "dashboard-server",
+  "version": "1.0.0",
+  "description": "Touch-optimized dashboard web server",
+  "main": "index.ts",
+  "scripts": {
+    "start": "bun run index.ts",
+    "dev": "bun --watch run index.ts"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "cors": "^2.8.5",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/multer": "^1.4.11",
+    "@types/cors": "^2.8.17"
+  }
+}
