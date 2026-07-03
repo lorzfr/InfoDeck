@@ -11,41 +11,60 @@ async function updateWeather() {
       return;
     }
 
-    const current = data.current;
-    const temp = current.temperature_2m;
-    const humidity = current.relative_humidity_2m;
-    const feelsLike = current.apparent_temperature;
-    const wind = current.wind_speed_10m;
+    const c = data.current;
+    const temp = c.temperature_2m;
+    const humidity = c.relative_humidity_2m;
+    const feelsLike = c.apparent_temperature;
+    const wind = c.wind_speed_10m;
+    const emoji = getWeatherEmoji(c.weather_code);
 
-    const weatherEmoji = getWeatherEmoji(current.weather_code);
+    const forecastHtml = data.forecast && data.forecast.length > 0
+      ? `<div class="mt-3"><div class="text-xs text-gray-500 mb-1 font-semibold tracking-wide">24-HOUR FORECAST</div>
+         <div class="flex gap-2 overflow-x-auto pb-2" style="scrollbar-width:thin">${
+           data.forecast.map(f => {
+             const dt = new Date(f.time);
+             const h = String(dt.getHours()).padStart(2, '0');
+             const d = dt.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+             const isNow = h === String(new Date().getHours()).padStart(2, '0');
+             return `<div class="flex-shrink-0 w-20 text-center p-2 rounded-xl ${isNow ? 'bg-blue-900/40 ring-1 ring-blue-500/50' : 'bg-gray-800/40'}">
+               <div class="text-xs font-bold text-gray-300">${h}:00</div>
+               <div class="text-xs text-gray-500">${d.split(' ')[0]}</div>
+               <div class="text-xl my-1">${getWeatherEmoji(f.weatherCode)}</div>
+               <div class="text-sm font-bold">${Math.round(f.temperature)}°</div>
+               <div class="text-xs text-gray-400">${Math.round(f.feelsLike)}°</div>
+               <div class="flex items-center justify-center gap-0.5 mt-1">
+                 <span class="text-xs text-blue-300">${f.precipitationProbability}%</span>
+                 <span class="text-xs text-gray-500">💧</span>
+               </div>
+               <div class="text-xs text-gray-400">${Math.round(f.windSpeed)} km/h</div>
+             </div>`;
+           }).join('')
+         }</div></div>`
+      : '';
 
     const html = `
-      <div class="text-center">
-        <div class="text-6xl mb-2">${weatherEmoji}</div>
-        <div class="weather-temp">${temp}°</div>
-        <div class="weather-condition">${weatherCodeToString(current.weather_code)}</div>
-        <div class="weather-detail mt-4">
-          <div class="weather-detail-item">
-            <div class="text-sm text-gray-400">Feels Like</div>
-            <div class="text-xl font-semibold">${feelsLike}°</div>
+      <div class="flex flex-col h-full">
+        <div class="text-center">
+          <div class="text-5xl mb-1">${emoji}</div>
+          <div class="weather-temp text-3xl">${Math.round(temp)}°</div>
+          <div class="weather-condition">${weatherCodeToString(c.weather_code)}</div>
+          <div class="weather-detail mt-2 mb-1">
+            <div class="weather-detail-item">
+              <div class="text-xs text-gray-400">Feels</div>
+              <div class="text-base font-semibold">${Math.round(feelsLike)}°</div>
+            </div>
+            <div class="weather-detail-item">
+              <div class="text-xs text-gray-400">Humidity</div>
+              <div class="text-base font-semibold">${humidity}%</div>
+            </div>
+            <div class="weather-detail-item">
+              <div class="text-xs text-gray-400">Wind</div>
+              <div class="text-base font-semibold">${Math.round(wind)} km/h</div>
+            </div>
           </div>
-          <div class="weather-detail-item">
-            <div class="text-sm text-gray-400">Humidity</div>
-            <div class="text-xl font-semibold">${humidity}%</div>
-          </div>
-          <div class="weather-detail-item">
-            <div class="text-sm text-gray-400">Wind</div>
-            <div class="text-xl font-semibold">${wind} km/h</div>
-          </div>
+          ${data.summary ? `<div class="text-xs text-gray-500 italic mb-1">${data.summary}</div>` : ''}
         </div>
-        ${data.summary ? `<div class="mt-4 text-sm text-gray-400 italic">${data.summary}</div>` : ''}
-        ${data.forecast ? `<div class="mt-4"><div class="text-sm text-gray-400 mb-2">Next 12 hours</div><div class="flex gap-2 overflow-x-auto justify-center">${data.forecast.slice(0, 6).map(f => `
-          <div class="text-center min-w-[60px] p-2 bg-gray-800/50 rounded-lg">
-            <div class="text-xs text-gray-400">${new Date(f.time).getHours()}:00</div>
-            <div class="text-lg">${getWeatherEmoji(f.weatherCode)}</div>
-            <div class="text-sm font-semibold">${f.temperature}°</div>
-          </div>
-        `).join('')}</div></div>` : ''}
+        ${forecastHtml}
       </div>
     `;
 
@@ -53,7 +72,7 @@ async function updateWeather() {
     document.getElementById('playlist-weather-content').innerHTML = html;
   } catch (err) {
     console.error('Weather update failed:', err);
-    const msg = `<div class="text-red-400 text-center text-sm">Weather unavailable</div>`;
+    const msg = '<div class="text-red-400 text-center text-sm">Weather unavailable</div>';
     document.querySelectorAll('#weather-content, #playlist-weather-content').forEach(el => {
       el.innerHTML = msg;
     });

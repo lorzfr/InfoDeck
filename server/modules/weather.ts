@@ -77,7 +77,7 @@ async function fetchWeather(): Promise<{ current: Record<string, unknown>; forec
   }
 
   const tempUnit = units === 'imperial' ? 'fahrenheit' : 'celsius';
-  const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,precipitation_probability&timezone=auto&forecast_days=2&temperature_unit=${tempUnit}`;
+  const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,apparent_temperature,weather_code,precipitation_probability,wind_speed_10m,relative_humidity_2m&timezone=auto&forecast_days=2&temperature_unit=${tempUnit}`;
 
   try {
     const res = await fetch(weatherUrl, { signal: AbortSignal.timeout(8000) });
@@ -87,30 +87,32 @@ async function fetchWeather(): Promise<{ current: Record<string, unknown>; forec
     }
     const data = await res.json() as {
       current: Record<string, unknown>;
-      hourly: { time: string[]; temperature_2m: number[]; weather_code: number[]; precipitation_probability: number[] };
+      hourly: { time: string[]; temperature_2m: number[]; apparent_temperature: number[]; weather_code: number[]; precipitation_probability: number[]; wind_speed_10m: number[]; relative_humidity_2m: number[] };
     };
 
     const now = new Date();
     const hourlyTimes = data.hourly.time;
-    const next12Indices: number[] = [];
-    for (let i = 0; i < hourlyTimes.length && next12Indices.length < 12; i++) {
+    const indices: number[] = [];
+    for (let i = 0; i < hourlyTimes.length && indices.length < 24; i++) {
       const dt = new Date(hourlyTimes[i]);
       if (dt > now) {
-        next12Indices.push(i);
+        indices.push(i);
       }
     }
 
-    // Fallback: if no future hours found, take last 6 entries
-    if (next12Indices.length === 0 && hourlyTimes.length > 0) {
-      const start = Math.max(0, hourlyTimes.length - 6);
-      for (let i = start; i < hourlyTimes.length; i++) next12Indices.push(i);
+    if (indices.length === 0 && hourlyTimes.length > 0) {
+      const start = Math.max(0, hourlyTimes.length - 24);
+      for (let i = start; i < hourlyTimes.length; i++) indices.push(i);
     }
 
-    const forecast = next12Indices.map(i => ({
+    const forecast = indices.map(i => ({
       time: data.hourly.time[i],
       temperature: data.hourly.temperature_2m[i],
+      feelsLike: data.hourly.apparent_temperature[i],
       weatherCode: data.hourly.weather_code[i],
       precipitationProbability: data.hourly.precipitation_probability[i],
+      windSpeed: data.hourly.wind_speed_10m[i],
+      humidity: data.hourly.relative_humidity_2m[i],
     }));
 
     return {
