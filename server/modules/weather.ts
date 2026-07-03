@@ -18,6 +18,7 @@ let cache: WeatherCache = {
 };
 
 const FETCH_INTERVAL = 10 * 60 * 1000;
+const RETRY_INTERVAL = 60 * 1000;
 const SUMMARY_INTERVAL = 60 * 60 * 1000;
 
 async function fetchWeather(): Promise<{ current: Record<string, unknown>; forecast: Record<string, unknown>[] } | null> {
@@ -58,14 +59,19 @@ async function fetchWeather(): Promise<{ current: Record<string, unknown>; forec
     };
 
     const now = new Date();
-    const currentHour = now.getHours();
     const hourlyTimes = data.hourly.time;
     const next12Indices: number[] = [];
-    for (let i = 0; i < hourlyTimes.length; i++) {
-      const h = new Date(hourlyTimes[i]).getHours();
-      if (h >= currentHour && next12Indices.length < 12) {
+    for (let i = 0; i < hourlyTimes.length && next12Indices.length < 12; i++) {
+      const dt = new Date(hourlyTimes[i]);
+      if (dt > now) {
         next12Indices.push(i);
       }
+    }
+
+    // Fallback: if no future hours found, take last 6 entries
+    if (next12Indices.length === 0 && hourlyTimes.length > 0) {
+      const start = Math.max(0, hourlyTimes.length - 6);
+      for (let i = start; i < hourlyTimes.length; i++) next12Indices.push(i);
     }
 
     const forecast = next12Indices.map(i => ({
@@ -118,12 +124,16 @@ export async function getWeather(): Promise<{
   summary: string;
 }> {
   const now = Date.now();
+  const stale = !cache.current;
+  const interval = stale ? RETRY_INTERVAL : FETCH_INTERVAL;
 
-  if (!cache.current || now - cache.fetchedAt > FETCH_INTERVAL) {
+  if (!cache.current || now - cache.fetchedAt > interval) {
     const data = await fetchWeather();
     if (data) {
       cache.current = data.current;
       cache.forecast = data.forecast;
+      cache.fetchedAt = now;
+    } else if (!cache.current) {
       cache.fetchedAt = now;
     }
   }

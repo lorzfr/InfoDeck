@@ -33,7 +33,8 @@ app.get('/api/config', (_req, res) => {
   const cfg = getConfig();
   const safe = JSON.parse(JSON.stringify(cfg));
   if (safe.modules?.weather?.apiKey) {
-    safe.modules.weather.apiKey = safe.modules.weather.apiKey ? '***' : '';
+    safe.modules.weather.apiKey = safe.modules.weather.apiKey && safe.modules.weather.apiKey !== 'YOUR_API_KEY'
+      ? '***' : '';
   }
   res.json(safe);
 });
