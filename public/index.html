@@ -47,7 +47,14 @@
       <div x-show="config.general.viewMode === 'boxes'" class="dashboard-grid" id="dashboardGrid">
         <!-- Weather -->
         <div x-show="config.modules.weather.enabled" class="dashboard-card" id="weather-card">
-          <div class="card-title">Weather</div>
+          <div class="card-title flex items-center justify-between">
+            <span>Weather</span>
+            <button onclick="updateWeather()" class="touch-btn text-gray-400 hover:text-white transition-colors" title="Refresh weather">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+            </button>
+          </div>
           <div class="card-content" id="weather-content">
             <div class="flex items-center justify-center h-full text-gray-400">
               <svg class="animate-spin h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
@@ -57,7 +64,14 @@
 
         <!-- Services -->
         <div x-show="config.modules.services.enabled" class="dashboard-card" id="services-card">
-          <div class="card-title">Service Health</div>
+          <div class="card-title flex items-center justify-between">
+            <span>Service Health</span>
+            <button onclick="refreshServicesNow()" class="touch-btn text-gray-400 hover:text-white transition-colors" title="Refresh services">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+            </button>
+          </div>
           <div class="card-content" id="services-content">
             <div class="flex items-center justify-center h-full text-gray-400">
               <svg class="animate-spin h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
@@ -77,7 +91,14 @@
 
         <!-- LLM Summary -->
         <div x-show="config.modules.llmSummary.enabled" class="dashboard-card" id="llm-summary-card">
-          <div class="card-title">System Summary</div>
+          <div class="card-title flex items-center justify-between">
+            <span>System Summary</span>
+            <button onclick="generateLlmSummary()" class="touch-btn text-gray-400 hover:text-white transition-colors" title="Generate new summary">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+            </button>
+          </div>
           <div class="card-content" id="llm-summary-content">
             <div class="flex items-center justify-center h-full text-gray-400">
               <svg class="animate-spin h-8 w-8" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>

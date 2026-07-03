@@ -43,3 +43,12 @@ async function updateServices() {
     console.error('Services update failed:', err);
   }
 }
+
+async function refreshServicesNow() {
+  try {
+    await fetch('/api/modules/services/refresh', { method: 'POST' });
+    await updateServices();
+  } catch (err) {
+    console.error('Services refresh failed:', err);
+  }
+}
