@@ -5,7 +5,13 @@ A self-contained, touch-optimized dashboard web server targeting 1536x960+ scree
 ## Quick Start
 
 ```bash
-# Run the interactive installer
+# One-liner install (curl | bash)
+curl -fsSL https://raw.githubusercontent.com/lorzfr/InfoDeck/main/bootstrap.sh | sudo bash
+```
+
+Or run locally:
+
+```bash
 sudo ./setup.sh
 ```
 
