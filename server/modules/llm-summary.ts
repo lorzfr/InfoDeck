@@ -38,16 +38,19 @@ export async function generateSummary(): Promise<SummaryCache> {
 
   const systemPrompt = `You are a system administrator assistant. Given the weather summary and service statuses, provide a brief overall status report. Highlight any concerns, note what is working well, and conclude with a health score from 1 to 10. The border color should be red (1) to green (10).`;
 
-  const prompt = `Weather: ${weatherText}\n\nService Statuses:\n${servicesText}\n\nProvide a brief status report with a health score out of 10.`;
+    const prompt = `Weather: ${weatherText}\n\nService Statuses:\n${servicesText}\n\nProvide a brief status report with a health score out of 10. Use plain text only — no code blocks, no markdown formatting.`;
 
   try {
     const result = await ollamaChat(prompt, systemPrompt);
     if (result) {
-      const scoreMatch = result.match(/\b(\d{1,2})\s*\/\s*10\b/);
+      // Strip markdown code blocks
+      let clean = result.replace(/```[\s\S]*?```/g, '').trim();
+      clean = clean.replace(/`([^`]+)`/g, '$1');
+      const scoreMatch = clean.match(/\b(\d{1,2})\s*\/\s*10\b/);
       const score = scoreMatch ? Math.min(10, Math.max(1, parseInt(scoreMatch[1]))) : 5;
 
       cache = {
-        summary: result,
+        summary: clean,
         score,
         color: scoreToColor(score),
         generatedAt: Date.now(),

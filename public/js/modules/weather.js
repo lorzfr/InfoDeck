@@ -53,6 +53,10 @@ async function updateWeather() {
     document.getElementById('playlist-weather-content').innerHTML = html;
   } catch (err) {
     console.error('Weather update failed:', err);
+    const msg = `<div class="text-red-400 text-center text-sm">Weather unavailable</div>`;
+    document.querySelectorAll('#weather-content, #playlist-weather-content').forEach(el => {
+      el.innerHTML = msg;
+    });
   }
 }
 

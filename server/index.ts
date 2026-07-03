@@ -7,7 +7,7 @@ import { loadConfig, getConfig, saveConfig } from './utils/config';
 import { testConnection } from './utils/ollama';
 import { getWeather } from './modules/weather';
 import { getServices, refreshServices } from './modules/services';
-import { getFlightradarConfig, getIframeUrl } from './modules/flightradar';
+import { getFlightradarConfig, getIframeUrl, getOsmUrl } from './modules/flightradar';
 import { getSummary, generateSummary } from './modules/llm-summary';
 
 const app = express();
@@ -95,6 +95,7 @@ app.get('/api/modules/flightradar', (_req, res) => {
   res.json({
     ...cfg,
     iframeUrl: getIframeUrl(cfg.centerLat, cfg.centerLon, cfg.zoom),
+    osmUrl: getOsmUrl(cfg.centerLat, cfg.centerLon, cfg.zoom),
   });
 });
 
@@ -102,15 +103,8 @@ app.get('/api/modules/flightradar/iframe', async (req, res) => {
   const lat = parseFloat(req.query.lat as string) || 52.52;
   const lon = parseFloat(req.query.lon as string) || 13.405;
   const zoom = parseInt(req.query.zoom as string) || 7;
-  const url = getIframeUrl(lat, lon, zoom);
-  try {
-    const resp = await fetch(url);
-    const html = await resp.text();
-    res.set('Content-Type', 'text/html');
-    res.send(html);
-  } catch {
-    res.redirect(url);
-  }
+  const url = getOsmUrl(lat, lon, zoom);
+  res.redirect(url);
 });
 
 app.get('/api/modules/llm-summary', async (_req, res) => {
