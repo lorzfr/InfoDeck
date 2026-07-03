@@ -27,32 +27,41 @@ async function fetchWeather(): Promise<{ current: Record<string, unknown>; forec
 
   let lat: number, lon: number;
 
-  if (location.includes(',')) {
-    const parts = location.split(',');
-    const city = parts[0].trim();
-    const country = parts[1]?.trim() || '';
-
-    const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
+  // Try numeric coords first (lat,lon)
+  const parts = location.split(',').map(s => s.trim());
+  if (parts.length === 2 && !isNaN(Number(parts[0])) && !isNaN(Number(parts[1]))) {
+    lat = Number(parts[0]);
+    lon = Number(parts[1]);
+  } else if (location.includes(',')) {
+    const city = parts[0];
+    const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=3&language=en&format=json`;
     try {
-      const geoRes = await fetch(geoUrl);
+      const geoRes = await fetch(geoUrl, { signal: AbortSignal.timeout(5000) });
+      if (!geoRes.ok) return null;
       const geoData = await geoRes.json() as { results?: { latitude: number; longitude: number }[] };
-      if (!geoData.results || geoData.results.length === 0) return null;
+      if (!geoData.results || geoData.results.length === 0) {
+        console.error('Weather: geocoding returned no results for', city);
+        return null;
+      }
       lat = geoData.results[0].latitude;
       lon = geoData.results[0].longitude;
     } catch {
+      console.error('Weather: geocoding fetch failed for', city);
       return null;
     }
   } else {
-    const coords = location.split(',').map(Number);
-    if (coords.length < 2 || isNaN(coords[0]) || isNaN(coords[1])) return null;
-    [lat, lon] = coords;
+    return null;
   }
 
   const tempUnit = units === 'imperial' ? 'fahrenheit' : 'celsius';
   const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code,precipitation_probability&timezone=auto&forecast_days=2&temperature_unit=${tempUnit}`;
 
   try {
-    const res = await fetch(weatherUrl);
+    const res = await fetch(weatherUrl, { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) {
+      console.error('Weather: API returned', res.status);
+      return null;
+    }
     const data = await res.json() as {
       current: Record<string, unknown>;
       hourly: { time: string[]; temperature_2m: number[]; weather_code: number[]; precipitation_probability: number[] };
