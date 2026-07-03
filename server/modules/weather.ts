@@ -32,25 +32,48 @@ async function fetchWeather(): Promise<{ current: Record<string, unknown>; forec
   if (parts.length === 2 && !isNaN(Number(parts[0])) && !isNaN(Number(parts[1]))) {
     lat = Number(parts[0]);
     lon = Number(parts[1]);
-  } else if (location.includes(',')) {
-    const city = parts[0];
-    const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=3&language=en&format=json`;
-    try {
-      const geoRes = await fetch(geoUrl, { signal: AbortSignal.timeout(5000) });
-      if (!geoRes.ok) return null;
-      const geoData = await geoRes.json() as { results?: { latitude: number; longitude: number }[] };
-      if (!geoData.results || geoData.results.length === 0) {
-        console.error('Weather: geocoding returned no results for', city);
-        return null;
+  } else {
+    const query = parts[0];
+    const country = parts.length > 1 ? parts[1] : '';
+
+    // Try Open-Meteo geocoding first
+    let found = false;
+    if (query) {
+      let geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=en&format=json`;
+      if (country) geoUrl += `&country=${encodeURIComponent(country)}`;
+      try {
+        const geoRes = await fetch(geoUrl, { signal: AbortSignal.timeout(5000) });
+        if (geoRes.ok) {
+          const geoData = await geoRes.json() as { results?: { latitude: number; longitude: number }[] };
+          if (geoData.results && geoData.results.length > 0) {
+            lat = geoData.results[0].latitude;
+            lon = geoData.results[0].longitude;
+            found = true;
+          }
+        }
+      } catch {}
+
+      // Fallback: Nominatim (OSM) geocoder
+      if (!found) {
+        try {
+          const nomUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(country ? `${query},${country}` : query)}&format=json&limit=1`;
+          const nomRes = await fetch(nomUrl, { signal: AbortSignal.timeout(5000) });
+          if (nomRes.ok) {
+            const nomData = await nomRes.json() as { lat: string; lon: string }[];
+            if (nomData && nomData.length > 0) {
+              lat = parseFloat(nomData[0].lat);
+              lon = parseFloat(nomData[0].lon);
+              found = true;
+            }
+          }
+        } catch {}
       }
-      lat = geoData.results[0].latitude;
-      lon = geoData.results[0].longitude;
-    } catch {
-      console.error('Weather: geocoding fetch failed for', city);
+    }
+
+    if (!found) {
+      console.error('Weather: could not geocode location:', location);
       return null;
     }
-  } else {
-    return null;
   }
 
   const tempUnit = units === 'imperial' ? 'fahrenheit' : 'celsius';
