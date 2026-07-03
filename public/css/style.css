@@ -117,12 +117,26 @@ body {
   inset: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 1rem 2rem 6rem;
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
   pointer-events: none;
+}
+
+.playlist-slide .playlist-header {
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.playlist-slide .playlist-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  min-height: 0;
 }
 
 .playlist-slide.active {

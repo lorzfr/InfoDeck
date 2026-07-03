@@ -31,7 +31,6 @@ function dashboardApp() {
       try {
         const res = await fetch('/api/config');
         this.config = await res.json();
-        document.title = this.config.general.dashboardTitle || 'Dashboard';
       } catch (err) {
         console.error('Failed to load config:', err);
       }
@@ -193,7 +192,6 @@ function dashboardApp() {
         });
         if (res.ok) {
           this.config = JSON.parse(JSON.stringify(this.form));
-          document.title = this.config.general.dashboardTitle || 'Dashboard';
           this.updatePlaylistTotal();
           if (this.config.general.viewMode === 'playlist') {
             this.startPlaylist();

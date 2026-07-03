@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=1536, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title x-text="config.general.dashboardTitle || 'Dashboard'">Dashboard</title>
+  <title>Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
   <script src="https://cdn.tailwindcss.com"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
   <link rel="stylesheet" href="/css/style.css">
@@ -112,32 +113,40 @@
         <div class="playlist-viewport" id="playlistViewport">
           <!-- Weather -->
           <div x-show="config.modules.weather.enabled" class="playlist-slide" id="playlist-weather">
-            <div class="text-2xl font-bold mb-4 text-gray-400">Weather</div>
-            <div id="playlist-weather-content" class="flex-1 flex items-center justify-center text-gray-500">
+            <div class="playlist-header">
+              <div class="text-2xl font-bold text-gray-400">Weather</div>
+            </div>
+            <div id="playlist-weather-content" class="playlist-body text-gray-500">
               Loading...
             </div>
           </div>
 
           <!-- Services -->
           <div x-show="config.modules.services.enabled" class="playlist-slide" id="playlist-services">
-            <div class="text-2xl font-bold mb-4 text-gray-400">Service Health</div>
-            <div id="playlist-services-content" class="flex-1 flex items-center justify-center text-gray-500">
+            <div class="playlist-header">
+              <div class="text-2xl font-bold text-gray-400">Service Health</div>
+            </div>
+            <div id="playlist-services-content" class="playlist-body text-gray-500">
               Loading...
             </div>
           </div>
 
-          <!-- Flightradar -->
+          <!-- Map -->
           <div x-show="config.modules.flightradar.enabled" class="playlist-slide" id="playlist-flightradar">
-            <div class="text-2xl font-bold mb-4 text-gray-400">FlightRadar24</div>
-            <div id="playlist-flightradar-content" class="flex-1 flex items-center justify-center text-gray-500 p-0">
+            <div class="playlist-header">
+              <div class="text-2xl font-bold text-gray-400">Map</div>
+            </div>
+            <div id="playlist-flightradar-content" class="playlist-body text-gray-500 p-0">
               Loading...
             </div>
           </div>
 
           <!-- LLM Summary -->
           <div x-show="config.modules.llmSummary.enabled" class="playlist-slide" id="playlist-llm-summary">
-            <div class="text-2xl font-bold mb-4 text-gray-400">System Summary</div>
-            <div id="playlist-llm-summary-content" class="flex-1 flex items-center justify-center text-gray-500">
+            <div class="playlist-header">
+              <div class="text-2xl font-bold text-gray-400">System Summary</div>
+            </div>
+            <div id="playlist-llm-summary-content" class="playlist-body text-gray-500">
               Loading...
             </div>
           </div>
