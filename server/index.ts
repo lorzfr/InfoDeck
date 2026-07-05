@@ -25,8 +25,15 @@ if (!existsSync(iconsDir)) {
 
 const upload = multer({ dest: iconsDir });
 
-// Initialize config
-loadConfig();
+// Initialize config — refuse to start if it fails
+// (the fix in utils/config.ts ensures user data is never silently overwritten)
+try {
+  loadConfig();
+} catch (err) {
+  console.error('Dashboard server cannot start without a valid config.json');
+  console.error(err instanceof Error ? err.message : String(err));
+  process.exit(1);
+}
 
 // Config API
 app.get('/api/config', (_req, res) => {

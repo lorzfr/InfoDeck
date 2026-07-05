@@ -97,24 +97,20 @@ export function loadConfig(): Config {
   ensureBackupDir();
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   try {
+    // Save a backup of the current config (in case we need to recover it)
     try { copyFileSync(CONFIG_PATH, join(BACKUP_DIR, `config.json.${timestamp}.bak`)); } catch { }
+
     const raw = readFileSync(CONFIG_PATH, 'utf-8');
     const parsed = JSON.parse(raw);
+
     config = { ...defaultConfig, ...parsed };
-    if (parsed.general) config.general = { ...defaultConfig.general, ...parsed.general };
-    if (parsed.ollama) config.ollama = { ...defaultConfig.ollama, ...parsed.ollama };
-    if (parsed.modules) {
-      config.modules = { ...defaultConfig.modules };
-      if (parsed.modules.weather) config.modules.weather = { ...defaultConfig.modules.weather, ...parsed.modules.weather };
-      if (parsed.modules.services) config.modules.services = { ...defaultConfig.modules.services, ...parsed.modules.services };
-      if (parsed.modules.flightradar) config.modules.flightradar = { ...defaultConfig.modules.flightradar, ...parsed.modules.flightradar };
-      if (parsed.modules.llmSummary) config.modules.llmSummary = { ...defaultConfig.modules.llmSummary, ...parsed.modules.llmSummary };
-    }
     return config!;
-  } catch {
-    config = { ...defaultConfig };
-    saveConfigRaw(config);
-    return config;
+  } catch (err) {
+    // CRITICAL FIX: Never silently overwrite user settings with defaults.
+    // Preserve the original file so the user can fix it manually.
+    const errMsg = err instanceof Error ? err.message : String(err);
+    console.error(`Config error — did not replace config.json with defaults:\n  ${errMsg}\n\nTo recover, edit '${CONFIG_PATH}' and fix the JSON syntax.`);
+    throw new Error(`Failed to load config: ${errMsg}`);
   }
 }
 

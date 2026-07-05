@@ -1,4 +1,14 @@
 // Services Module
+function faviconUrl(url) {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    return `https://www.google.com/s2/favicons?domain=${u.hostname}&sz=64`;
+  } catch {
+    return null;
+  }
+}
+
 async function updateServices() {
   try {
     const res = await fetch('/api/modules/services');
@@ -14,6 +24,7 @@ async function updateServices() {
     const cards = data.map(s => {
       const statusIcon = s.status === 'online' ? '✅' : s.status === 'degraded' ? '⚠️' : '❌';
       const statusClass = `service-${s.status}`;
+      const iconSrc = s.icon || faviconUrl(s.publicUrl);
 
       const publicCell = s.publicSkipped
         ? '<span class="text-gray-600">— disabled</span>'
@@ -31,7 +42,7 @@ async function updateServices() {
         <div class="bg-gray-800/50 rounded-lg p-3 mb-2">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              ${s.icon ? `<img src="${s.icon}" class="w-6 h-6 rounded">` : ''}
+              ${iconSrc ? `<img src="${iconSrc}" class="w-6 h-6 rounded">` : ''}
               <span class="font-semibold">${s.name}</span>
             </div>
             <span class="${statusClass} text-lg">${statusIcon} ${s.status}</span>
